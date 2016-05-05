@@ -1,0 +1,117 @@
+#!/bin/bash
+# vim: ft=bash
+
+set -euo pipefail
+
+source "$(dirname "$0")"/vendor/github.com/reconquest/import.bash/import.bash
+
+import "github.com/reconquest/opts"
+
+
+_vendor_dir="vendor"
+
+function :main() {
+    local -A opts
+    local -a args
+
+    opts:parse opts args -u -h --help -- "${@}"
+
+    if [ "${opts[-h]:-}" -o "${opts[--help]:-}" ]; then
+        :usage
+
+        exit 1
+    fi
+
+    cd "$(git rev-parse --show-toplevel)"
+
+    if [ "${opts[-u]:-}" ]; then
+        if [ ${#args[@]} -gt 1 ]; then
+            :update-vendor "${args[1]}"
+        else
+            :update-all-vendors --recursive
+        fi
+    else
+        if [ ${#args[@]} -gt 1 ]; then
+            :install-vendors "${args[@]:1}"
+        else
+            :update-all-vendors
+        fi
+    fi
+}
+
+
+function :update-vendor() {
+    local vendor=$1
+
+    vendor=$(:ensure-vendor-bash-extension $vendor)
+    git submodule update --init --remote --recursive "$_vendor_dir/$vendor"
+}
+
+
+function :update-all-vendors() {
+    git submodule update --init --remote "${@}"
+}
+
+
+function :install-vendors() {
+    local vendor
+
+    for vendor in "${@}"; do
+        vendor=$(:ensure-vendor-bash-extension $vendor)
+        :install-vendor "$vendor"
+    done
+}
+
+
+function :ensure-vendor-bash-extension() {
+    local vendor="$1"
+
+    if ! grep -Pq '\.bash$|\.sh$' <<< "$vendor"; then
+        printf "%s" "$vendor.bash"
+    else
+        printf "%s" "$vendor"
+    fi
+}
+
+
+function :install-vendor() {
+    local vendor="$1"
+    local vendor_url="$1"
+
+    if ! grep -Pq '^\w+://|^\./' <<< "$vendor_url"; then
+        vendor_url="https://$vendor_url"
+    else
+        vendor=$(sed -r 's@^\w+:@@' <<< "$vendor")
+    fi
+
+    vendor=$(sed -r "s@\.\.?/@@g" <<< "$vendor")
+
+    git submodule add "$vendor_url" "$_vendor_dir/$vendor"
+    git submodule update --init --recursive "$_vendor_dir/$vendor"
+
+    cat <<HELP
+Use following statement to use it in your code:
+
+    import "$vendor"
+HELP
+}
+
+
+function :usage() {
+    cat <<HELP
+
+go get inspired tool for managing vendor libraries in bash.
+
+Usage:
+    bash get <url>...
+    bash get -u [<url>]
+    bash get -h | --help
+
+Options:
+    -h --help  Display this help message.
+    -u         Update all or specified dependencies.
+HELP
+}
+
+
+:main "${@}"
