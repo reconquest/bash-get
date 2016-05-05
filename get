@@ -93,7 +93,7 @@ function :install-vendor() {
     cat <<HELP
 Use following statement to use it in your code:
 
-    import "$vendor"
+    import "${vendor%*.bash}"
 HELP
 }
 
