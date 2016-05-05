@@ -4,7 +4,7 @@ go get inspired bash get tool.
 
 Consider looking at https://github.com/reconquest/import.bash too.
 
-# Usage:
+# Usage
 
 ## Installing new vendor
 
@@ -23,4 +23,22 @@ bash get -u github.com/reconquest/opts.bash
 ```bash
 bash get -u  # or
 bash get     # non-recursive
+```
+
+## Using vendor
+
+### Without import.bash
+
+```bash
+source vendors/github.com/reconquest/opts.bash/opts.bash
+
+# use of opts:... methods
+```
+
+### With import.bash
+
+```bash
+import github.com/reconquest/opts
+
+# use of opts:... methods
 ```
