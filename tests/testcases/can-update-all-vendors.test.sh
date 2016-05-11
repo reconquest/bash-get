@@ -34,6 +34,14 @@ tests:assert-stdout 'vendor-b.bash'
 tests:ensure :bash-get
 
 tests:ensure tests:require vendor/src/vendor-a.bash/vendor-a.bash
+tests:assert-stdout 'vendor-a.bash'
+
+tests:ensure tests:require vendor/src/vendor-b.bash/vendor-b.bash
+tests:assert-stdout 'vendor-b.bash'
+
+tests:ensure :bash-get -u
+
+tests:ensure tests:require vendor/src/vendor-a.bash/vendor-a.bash
 tests:assert-stdout '123'
 
 tests:ensure tests:require vendor/src/vendor-b.bash/vendor-b.bash

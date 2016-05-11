@@ -29,13 +29,13 @@ function :main() {
         if [ ${#args[@]} -gt 1 ]; then
             :update-vendor "${args[1]}"
         else
-            :update-all-vendors --recursive
+            :update-all-vendors --remote --recursive
         fi
     else
         if [ ${#args[@]} -gt 1 ]; then
             :install-vendors "${args[@]:1}"
         else
-            :update-all-vendors
+            :update-all-vendors --recursive
         fi
     fi
 }
@@ -50,7 +50,7 @@ function :update-vendor() {
 
 
 function :update-all-vendors() {
-    git submodule update --init --remote "${@}"
+    git submodule update --init "${@}"
 }
 
 
